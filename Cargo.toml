@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["raft_app", "raft_core"]
