@@ -4,21 +4,13 @@ pub mod transport;
 
 use std::{sync::{atomic::{AtomicBool, Ordering}, Arc}, time::Duration};
 
+use infrastructure::infra_bootstrap::InfraBootstrap;
 use raft_core::channel::{message::Message, request_reply_channel::{Consumer, RequestReplyChannel}};
 use transport::helloworld::payload::{MyRequest, MyResponse};
 
 #[tokio::main]
 async fn main() {
-    // Initialize the logger with detailed configuration
-    env_logger::Builder::from_env(
-        env_logger::Env::default()
-            .default_filter_or("info")
-            .default_write_style_or("always")
-    )
-    .format_timestamp_millis()
-    .format_level(true)
-    .format_target(true)
-    .init();
+    InfraBootstrap::bootstrap();
     
     log::info!("Starting Raft application...");
     // Create the channel and get the receiver
@@ -43,16 +35,29 @@ async fn main() {
     let running_signal_consumer = running_signal.clone();
 
     let producer_task = tokio::spawn(async move {
-        let response = producer
-            .send(
-                MyRequest {
-                    correlation_id: 1,
-                    content: "Hello, world!".to_string(),
-                },
-                Duration::from_secs(1),
-            )
-            .await;
-        log::info!("Producer response: {:?}", response);
+        let start_time = std::time::Instant::now();
+        let total_requests = 200_000;
+        for i in 0..total_requests {
+            let response = producer
+                .send(
+                    MyRequest {
+                        correlation_id: i,
+                        content: format!("Hello, world! #{}", i),
+                    },
+                    Duration::from_secs(10),
+                )
+                .await;
+            log::debug!("Producer response #{}: {:?}", i, response);
+        }
+        
+        let elapsed = start_time.elapsed();
+        log::info!(
+            "Completed {} requests in {:.2?} ({:.2} requests/sec)", 
+            total_requests,
+            elapsed,
+            total_requests as f64 / elapsed.as_secs_f64()
+        );
+        
         running_signal_producer.store(false, Ordering::Release);
     });
 

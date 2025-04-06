@@ -112,7 +112,6 @@ where
         while running_signal.load(Ordering::Relaxed) {
             let result = timeout(Duration::from_millis(500), self.receiver.recv()).await;
             log::debug!("Consumer: Received message: {:?}", result);
-            println!("Consumer: Received message: {:?}", result);
             match result {
                 Ok(Some(message)) => {
                     let response = strategy(&message);
