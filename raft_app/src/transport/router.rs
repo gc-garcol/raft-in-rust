@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use axum::{Router, http::HeaderValue};
 use hyper::{
@@ -6,7 +8,10 @@ use hyper::{
 };
 use tower_http::cors::CorsLayer;
 
-use super::app_router::{balance_router, helloworld_router};
+use super::app_router::{
+    balance_router::{self, BalanceRouter},
+    helloworld_router::{self, HelloWorldRouter}
+};
 use shaku::{Component, Interface};
 
 #[async_trait]
@@ -18,6 +23,12 @@ pub trait AppRouter: Interface {
 #[shaku(interface = AppRouter)]
 pub struct AppRouterImpl {
     domain: String,
+
+    #[shaku(inject)]
+    hello_world_router: Arc<dyn HelloWorldRouter>,
+
+    #[shaku(inject)]
+    balance_router: Arc<dyn BalanceRouter>,
 }
 
 impl AppRouterImpl {
@@ -29,8 +40,8 @@ impl AppRouterImpl {
 
         let router = Router::new()
             .layer(cors)
-            .merge(helloworld_router::create_router())
-            .merge(balance_router::create_router());
+            .merge(self.hello_world_router.create_router())
+            .merge(self.balance_router.create_router());
 
         router
     }

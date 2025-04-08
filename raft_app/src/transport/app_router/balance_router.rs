@@ -1,10 +1,22 @@
 use axum::{routing::post, response::IntoResponse, Router, Json};
+use shaku::{Component, Interface};
 
 use super::balance_payload::CreateBalanceResponse;
 
-pub fn create_router() -> Router {
-    Router::new()
-        .route("/balance", post(create_balance))
+pub trait BalanceRouter: Interface {
+    fn create_router(&self) -> Router;
+}
+
+#[derive(Component)]
+#[shaku(interface = BalanceRouter)]
+pub struct BalanceRouterImpl {
+}
+
+impl BalanceRouter for BalanceRouterImpl {
+    fn create_router(&self) -> Router {
+        Router::new()
+            .route("/balance", post(create_balance))
+    }
 }
 
 async fn create_balance() -> impl IntoResponse {

@@ -3,10 +3,14 @@ use dotenv::dotenv;
 use std::env;
 
 use crate::transport::router::{AppRouterImpl, AppRouterImplParameters};
+use crate::transport::app_router::{
+    helloworld_router::HelloWorldRouterImpl,
+    balance_router::BalanceRouterImpl,
+};
 
 module! {
     pub AppModule {
-        components = [AppRouterImpl],
+        components = [AppRouterImpl, HelloWorldRouterImpl, BalanceRouterImpl],
         providers = [],
     }
 }
