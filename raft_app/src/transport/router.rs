@@ -6,7 +6,7 @@ use hyper::{
 };
 use tower_http::cors::CorsLayer;
 
-use super::app_router::helloworld_router;
+use super::app_router::{balance_router, helloworld_router};
 use shaku::{Component, Interface};
 
 #[async_trait]
@@ -29,7 +29,8 @@ impl AppRouterImpl {
 
         let router = Router::new()
             .layer(cors)
-            .merge(helloworld_router::create_router());
+            .merge(helloworld_router::create_router())
+            .merge(balance_router::create_router());
 
         router
     }
