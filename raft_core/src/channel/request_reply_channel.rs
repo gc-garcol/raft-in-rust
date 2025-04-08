@@ -115,7 +115,7 @@ where
             match result {
                 Ok(Some(message)) => {
                     let response = strategy(&message);
-                    if let Err(e) = message.response.send(response) {
+                    if let Err(e) = message.response_channel.send(response) {
                         log::error!("Failed to send response: {:?}", e);
                     }
                 }

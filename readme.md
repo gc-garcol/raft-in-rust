@@ -12,7 +12,11 @@
 ## Development
 
 ```bash
-RUST_LOG=raft_app=debug,raft_core=info cargo run
+cp .env.example .env
+```
+
+```bash
+SERVER_DOMAIN=127.0.0.1:8080 RUST_LOG=raft_app=debug,raft_core=info cargo run
 ```
 
 ### Benchmark
